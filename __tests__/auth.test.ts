@@ -38,7 +38,7 @@ describe('auth tests', () => {
     process.env[`INPUT_SETTINGS-PATH`] = altHome;
     await io.rmRF(altHome); // ensure it doesn't already exist
 
-    await auth.configAuthentication(id, username, password);
+    await auth.configAuthentication([{id, username, password}]);
 
     expect(fs.existsSync(m2Dir)).toBe(false);
     expect(fs.existsSync(settingsFile)).toBe(false);
@@ -46,7 +46,7 @@ describe('auth tests', () => {
     expect(fs.existsSync(altHome)).toBe(true);
     expect(fs.existsSync(altSettingsFile)).toBe(true);
     expect(fs.readFileSync(altSettingsFile, 'utf-8')).toEqual(
-      auth.generate(id, username, password)
+      auth.generate([{id, username, password}])
     );
 
     delete process.env[`INPUT_SETTINGS-PATH`];
@@ -58,12 +58,12 @@ describe('auth tests', () => {
     const username = 'UNAME';
     const password = 'TOKEN';
 
-    await auth.configAuthentication(id, username, password);
+    await auth.configAuthentication([{id, username, password}]);
 
     expect(fs.existsSync(m2Dir)).toBe(true);
     expect(fs.existsSync(settingsFile)).toBe(true);
     expect(fs.readFileSync(settingsFile, 'utf-8')).toEqual(
-      auth.generate(id, username, password)
+      auth.generate([{id, username, password}])
     );
   }, 100000);
 
@@ -73,12 +73,12 @@ describe('auth tests', () => {
     const password = 'TOKEN';
     const gpgPassphrase = 'GPG';
 
-    await auth.configAuthentication(id, username, password, gpgPassphrase);
+    await auth.configAuthentication([{id, username, password}], gpgPassphrase);
 
     expect(fs.existsSync(m2Dir)).toBe(true);
     expect(fs.existsSync(settingsFile)).toBe(true);
     expect(fs.readFileSync(settingsFile, 'utf-8')).toEqual(
-      auth.generate(id, username, password, gpgPassphrase)
+      auth.generate([{id, username, password}], gpgPassphrase)
     );
   }, 100000);
 
@@ -92,12 +92,12 @@ describe('auth tests', () => {
     expect(fs.existsSync(m2Dir)).toBe(true);
     expect(fs.existsSync(settingsFile)).toBe(true);
 
-    await auth.configAuthentication(id, username, password);
+    await auth.configAuthentication([{id, username, password}]);
 
     expect(fs.existsSync(m2Dir)).toBe(true);
     expect(fs.existsSync(settingsFile)).toBe(true);
     expect(fs.readFileSync(settingsFile, 'utf-8')).toEqual(
-      auth.generate(id, username, password)
+      auth.generate([{id, username, password}])
     );
   }, 100000);
 
@@ -118,7 +118,7 @@ describe('auth tests', () => {
   </servers>
 </settings>`;
 
-    expect(auth.generate(id, username, password)).toEqual(expectedSettings);
+    expect(auth.generate([{id, username, password}])).toEqual(expectedSettings);
   });
 
   it('generates valid settings.xml with additional configuration', () => {
@@ -143,7 +143,7 @@ describe('auth tests', () => {
   </servers>
 </settings>`;
 
-    expect(auth.generate(id, username, password, gpgPassphrase)).toEqual(
+    expect(auth.generate([{id, username, password}], gpgPassphrase)).toEqual(
       expectedSettings
     );
   });

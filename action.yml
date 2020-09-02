@@ -36,6 +36,10 @@ inputs:
        authentication to the Apache Maven repository. Default is $GITHUB_TOKEN'
     required: false
     default: 'GITHUB_TOKEN'
+  servers:
+    description: 'IDs and environment variable names for authentication to the
+       Apache Maven repositories.'
+    required: false
   settings-path:
     description: 'Path to where the settings.xml file will be written. Default is ~/.m2.'
     required: false

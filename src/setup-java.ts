@@ -34,6 +34,10 @@ async function run() {
     const password = core.getInput(constants.INPUT_SERVER_PASSWORD, {
       required: false
     });
+    const serversJson = core.getInput(constants.INPUT_SERVERS, {
+      required: false
+    });
+
     const gpgPrivateKey =
       core.getInput(constants.INPUT_GPG_PRIVATE_KEY, {required: false}) ||
       constants.INPUT_DEFAULT_GPG_PRIVATE_KEY;
@@ -45,7 +49,11 @@ async function run() {
       core.setSecret(gpgPrivateKey);
     }
 
-    await auth.configAuthentication(id, username, password, gpgPassphrase);
+    const servers = serversJson
+      ? JSON.parse(serversJson)
+      : [{id, username, password}];
+
+    await auth.configAuthentication(servers, gpgPassphrase);
 
     if (gpgPrivateKey) {
       core.info('importing private key');

@@ -9,18 +9,25 @@ import * as constants from './constants';
 export const M2_DIR = '.m2';
 export const SETTINGS_FILE = 'settings.xml';
 
+export interface Server {
+  readonly id: string;
+  readonly username: string;
+  readonly password: string;
+}
+
 export async function configAuthentication(
-  id: string,
-  username: string,
-  password: string,
+  servers: Server[],
   gpgPassphrase: string | undefined = undefined
 ) {
   console.log(
-    `creating ${SETTINGS_FILE} with server-id: ${id};`,
-    'environment variables:',
-    `username=\$${username},`,
-    `password=\$${password},`,
-    `and gpg-passphrase=${gpgPassphrase ? '$' + gpgPassphrase : null}`
+    `creating ${SETTINGS_FILE} with gpg-passphrase=${
+      gpgPassphrase ? '$' + gpgPassphrase : null
+    } and servers:`
+  );
+  servers.forEach(s =>
+    console.log(
+      `server with id: ${s.id}; environment variables: username=\$${s.username}, password=\$${s.password}`
+    )
   );
   // when an alternate m2 location is specified use only that location (no .m2 directory)
   // otherwise use the home/.m2/ path
@@ -30,17 +37,12 @@ export async function configAuthentication(
   );
   await io.mkdirP(settingsDirectory);
   core.debug(`created directory ${settingsDirectory}`);
-  await write(
-    settingsDirectory,
-    generate(id, username, password, gpgPassphrase)
-  );
+  await write(settingsDirectory, generate(servers, gpgPassphrase));
 }
 
 // only exported for testing purposes
 export function generate(
-  id: string,
-  username: string,
-  password: string,
+  servers: Server[],
   gpgPassphrase: string | undefined = undefined
 ) {
   const xmlObj: {[key: string]: any} = {
@@ -50,13 +52,11 @@ export function generate(
       '@xsi:schemaLocation':
         'http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd',
       servers: {
-        server: [
-          {
-            id: id,
-            username: `\${env.${username}}`,
-            password: `\${env.${password}}`
-          }
-        ]
+        server: servers.map(server => ({
+          id: server.id,
+          username: `\${env.${server.username}}`,
+          password: `\${env.${server.password}}`
+        }))
       }
     }
   };
